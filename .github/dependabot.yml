@@ -1,0 +1,42 @@
+# Dependabot configuration for automated dependency updates
+# This provides an alternative/complement to the custom sync workflow
+
+version: 2
+updates:
+  # Monitor React and React-DOM specifically
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "daily"
+      time: "00:00"
+    open-pull-requests-limit: 3
+    
+    # Only auto-update React packages
+    allow:
+      - dependency-name: "react"
+      - dependency-name: "react-dom"
+    
+    # Auto-merge patch and minor updates
+    # (Major updates will require manual review)
+    labels:
+      - "dependencies"
+      - "automated"
+    
+    # Commit message prefix
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+    
+    # Reviewers (optional - update with maintainer GitHub username)
+    # reviewers:
+    #   - "lofcz"
+    
+  # Monitor GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    labels:
+      - "ci/cd"
+      - "dependencies"
+

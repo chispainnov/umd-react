@@ -53,8 +53,17 @@ jobs:
               
               let result = 'unchanged';
               if (isNewer && !isDowngradeFromPrerelease) {
-                console.log(`✅ Updating version from ${publishedVersion} to ${reactVersion}`);
+                console.log(`✅ Updating to React ${reactVersion}`);
+                console.log(`   - package.json version: ${publishedVersion} → ${reactVersion}`);
+                console.log(`   - devDependencies.react: ${pkg.devDependencies.react} → ${reactVersion}`);
+                console.log(`   - devDependencies.react-dom: ${pkg.devDependencies['react-dom']} → ${reactVersion}`);
+                
                 pkg.version = reactVersion;
+                // Update devDependencies to match the React version
+                // This ensures the build uses the correct React source and embeds the right version
+                pkg.devDependencies.react = reactVersion;
+                pkg.devDependencies['react-dom'] = reactVersion;
+                
                 fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2));
                 core.setOutput('newVersion', reactVersion);
                 result = 'updated';
@@ -71,11 +80,15 @@ jobs:
 
       - name: Install dependencies
         if: steps.react-version.outputs.result == 'updated'
-        run: npm ci
+        run: npm install
 
       - name: Build
         if: steps.react-version.outputs.result == 'updated'
         run: npm run build
+
+      - name: Validate versions
+        if: steps.react-version.outputs.result == 'updated'
+        run: npm run validate
 
       - name: Publish to NPM
         if: ${{ steps.react-version.outputs.result == 'updated' && env.NODE_AUTH_TOKEN != '' }}
@@ -88,6 +101,6 @@ jobs:
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          git add package.json
-          git commit -m "chore: update version to match React ${{ steps.react-version.outputs.newVersion }}"
+          git add package.json package-lock.json dist/
+          git commit -m "chore: sync to React ${{ steps.react-version.outputs.newVersion }}"
           git push

@@ -7,9 +7,30 @@ import webpack from 'webpack';
 import semver from 'semver';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const pkg = JSON.parse(readFileSync('./node_modules/react/package.json'));
-const version = pkg.version;
+
+// Read version from package.json devDependencies (source of truth)
+const rootPkg = JSON.parse(readFileSync('./package.json', 'utf8'));
+const expectedVersion = rootPkg.devDependencies.react.replace(/^[\^~>=<]/, '');
+
+// Read version from installed node_modules (validation)
+const installedPkg = JSON.parse(readFileSync('./node_modules/react/package.json', 'utf8'));
+const installedVersion = installedPkg.version;
+
+// Validate versions match - fail fast if they don't
+if (expectedVersion !== installedVersion) {
+  console.error('❌ VERSION MISMATCH DETECTED:');
+  console.error(`   package.json devDependencies.react: ${expectedVersion}`);
+  console.error(`   node_modules/react/package.json:    ${installedVersion}`);
+  console.error('');
+  console.error('💡 Fix: Run "npm install" to sync dependencies');
+  process.exit(1);
+}
+
+// Use the validated version
+const version = expectedVersion;
 const isReact19OrHigher = semver.gte(version, '19.0.0');
+
+console.log(`✓ Building with React ${version}`);
 
 const terserConfig = {
     compress: {

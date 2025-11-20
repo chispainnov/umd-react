@@ -1,0 +1,76 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended"
+  ],
+  "description": "Renovate configuration for automated React updates",
+  "schedule": [
+    "every 6 hours"
+  ],
+  "timezone": "UTC",
+  "labels": [
+    "dependencies",
+    "automated"
+  ],
+  "packageRules": [
+    {
+      "description": "Auto-merge React patch updates",
+      "matchPackageNames": [
+        "react",
+        "react-dom"
+      ],
+      "matchUpdateTypes": [
+        "patch"
+      ],
+      "automerge": true,
+      "automergeType": "pr",
+      "platformAutomerge": true
+    },
+    {
+      "description": "Auto-merge React minor updates",
+      "matchPackageNames": [
+        "react",
+        "react-dom"
+      ],
+      "matchUpdateTypes": [
+        "minor"
+      ],
+      "automerge": true,
+      "automergeType": "pr",
+      "platformAutomerge": true,
+      "minimumReleaseAge": "3 days"
+    },
+    {
+      "description": "Manual review for React major updates",
+      "matchPackageNames": [
+        "react",
+        "react-dom"
+      ],
+      "matchUpdateTypes": [
+        "major"
+      ],
+      "automerge": false
+    },
+    {
+      "description": "Group React and React-DOM together",
+      "matchPackageNames": [
+        "react",
+        "react-dom"
+      ],
+      "groupName": "React",
+      "commitMessageTopic": "React"
+    }
+  ],
+  "postUpdateOptions": [
+    "npmDedupe"
+  ],
+  "prConcurrentLimit": 3,
+  "prHourlyLimit": 2,
+  "lockFileMaintenance": {
+    "enabled": true,
+    "schedule": [
+      "before 3am on Monday"
+    ]
+  }
+}
+
